@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinVista · 金融数据可视化平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #3730A3;
+            --accent: #A855F7;
+            --accent-light: #C084FC;
+            --accent-dark: #7C3AED;
+            --bg-primary: #F0F4FF;
+            --bg-card: #FFFFFF;
+            --bg-sidebar: linear-gradient(180deg, #1E1B4B 0%, #312E81 50%, #3730A3 100%);
+            --text-primary: #1E1B4B;
+            --text-secondary: #6366F1;
+            --text-muted: #94A3B8;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --shadow-sm: 0 1px 2px rgba(79, 70, 229, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -2px rgba(79, 70, 229, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(79, 70, 229, 0.1), 0 4px 6px -4px rgba(79, 70, 229, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(79, 70, 229, 0.1), 0 8px 10px -6px rgba(79, 70, 229, 0.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: var(--bg-sidebar);
+            padding: 24px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent), var(--primary-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-sub {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-label {
+            color: rgba(255,255,255,0.35);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.65);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--accent-light), var(--primary-light));
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px;
+            background: rgba(255,255,255,0.06);
+            border-radius: var(--radius-sm);
+        }
+
+        .sidebar-footer p {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-footer span {
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* === MAIN CONTENT === */
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* === TOP BAR === */
+        .topbar {
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .topbar-left p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .topbar-btn:hover {
+            border-color: var(--primary-light);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .topbar-btn .dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            width: 260px;
+            transition: var(--transition);
+        }
+
+        .search-box:focus-within {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-box i { color: var(--text-muted); font-size: 14px; }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
+            width: 100%;
+            font-family: inherit;
+            color: var(--text-primary);
+        }
+
+        .search-box input::placeholder { color: var(--text-muted); }
+
+        /* === CONTENT === */
+        .content {
+            padding: 28px 32px;
+        }
+
+        /* === KPI CARDS === */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .kpi-card:nth-child(1)::after { background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+        .kpi-card:nth-child(2)::after { background: linear-gradient(90deg, var(--accent), var(--accent-light)); }
+        .kpi-card:nth-child(3)::after { background: linear-gradient(90deg, var(--success), #34D399); }
+        .kpi-card:nth-child(4)::after { background: linear-gradient(90deg, var(--warning), #FBBF24); }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .kpi-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .kpi-card:nth-child(1) .kpi-icon { background: #EEF2FF; color: var(--primary); }
+        .kpi-card:nth-child(2) .kpi-icon { background: #F3E8FF; color: var(--accent); }
+        .kpi-card:nth-child(3) .kpi-icon { background: #ECFDF5; color: var(--success); }
+        .kpi-card:nth-child(4) .kpi-icon { background: #FFFBEB; color: var(--warning); }
+
+        .kpi-change {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .kpi-change.up { background: #ECFDF5; color: var(--success); }
+        .kpi-change.down { background: #FEF2F2; color: var(--danger); }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            letter-spacing: -1px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* === CHART SECTIONS === */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .chart-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-primary);
+            padding: 3px;
+            border-radius: 10px;
+        }
+
+        .chart-tab {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-muted);
+            border: none;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .chart-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-tab:hover:not(.active) { color: var(--text-primary); }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        /* === BOTTOM GRID === */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        /* === MARKET TABLE === */
+        .market-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .market-table thead th {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .market-table tbody tr {
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .market-table tbody tr:hover {
+            background: var(--bg-primary);
+        }
+
+        .market-table tbody td {
+            padding: 12px 14px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            vertical-align: middle;
+        }
+
+        .stock-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stock-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .stock-info .name { font-weight: 600; font-size: 13px; }
+        .stock-info .code { font-size: 11px; color: var(--text-muted); }
+
+        .price { font-weight: 700; font-variant-numeric: tabular-nums; }
+        .price.up { color: var(--danger); }
+        .price.down { color: var(--success); }
+
+        .change-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .change-badge.up { background: #FEF2F2; color: var(--danger); }
+        .change-badge.down { background: #ECFDF5; color: var(--success); }
+
+        /* === ALERT LIST === */
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .alert-item:last-child { border-bottom: none; }
+
+        .alert-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .alert-dot.critical { background: var(--danger); box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+        .alert-dot.warning { background: var(--warning); box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+        .alert-dot.info { background: var(--primary); box-shadow: 0 0 8px rgba(79, 70, 229, 0.4); }
+
+        .alert-content .alert-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+        .alert-content .alert-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+        .alert-content .alert-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* === METRICS ROW === */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .metric-chart-wrap {
+            height: 80px;
+            margin-bottom: 12px;
+        }
+
+        .metric-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-current {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* === ANIMATIONS === */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.1s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.2s; }
+
+        /* === LIVE PULSE === */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        /* === ADD INDICATOR MODAL === */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(30, 27, 75, 0.4);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            padding: 32px;
+            width: 440px;
+            max-width: 90vw;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .modal h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: inherit;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover { background: #E2E8F0; }
+
+        /* Mini sparkline bars */
+        .mini-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 30px;
+        }
+
+        .mini-bar {
+            width: 6px;
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        .kpi-card:hover .mini-bar {
+            transform: scaleY(1.1);
+        }
+
+        /* === PAGE SYSTEM === */
+        .page { display: none; }
+        .page.active { display: block; animation: fadeInUp 0.4s ease; }
+
+        /* === PAGE SPECIFIC STYLES === */
+        .page-header-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .page-header-bar h2 { font-size: 18px; font-weight: 700; }
+
+        .full-width-chart { height: 360px; }
+
+        .stat-row {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;
+        }
+        .stat-box {
+            background: var(--bg-primary); border-radius: var(--radius-sm); padding: 16px 20px;
+            border: 1px solid var(--border);
+        }
+        .stat-box .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .stat-box .value { font-size: 20px; font-weight: 800; }
+
+        .heat-grid {
+            display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px;
+        }
+        .heat-cell {
+            aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center;
+            justify-content: center; font-size: 11px; font-weight: 600; color: white;
+            cursor: pointer; transition: var(--transition);
+        }
+        .heat-cell:hover { transform: scale(1.15); z-index: 2; }
+
+        .risk-meter {
+            width: 200px; height: 200px; border-radius: 50%; margin: 20px auto;
+            background: conic-gradient(var(--success) 0deg, var(--success) 180deg, var(--warning) 180deg, var(--warning) 270deg, var(--danger) 270deg, var(--danger) 360deg);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .risk-meter-inner {
+            width: 160px; height: 160px; border-radius: 50%; background: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .risk-meter-inner .score { font-size: 36px; font-weight: 800; }
+        .risk-meter-inner .txt { font-size: 12px; color: var(--text-muted); }
+
+        .settings-section { margin-bottom: 24px; }
+        .settings-section h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+        .setting-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid rgba(226,232,240,0.4);
+        }
+        .setting-row .info { flex: 1; }
+        .setting-row .info .s-title { font-size: 13px; font-weight: 600; }
+        .setting-row .info .s-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        .toggle {
+            width: 44px; height: 24px; border-radius: 12px; background: #CBD5E1;
+            position: relative; cursor: pointer; transition: var(--transition);
+        }
+        .toggle.on { background: var(--primary); }
+        .toggle::after {
+            content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%;
+            background: white; top: 2px; left: 2px; transition: var(--transition);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle.on::after { left: 22px; }
+
+        .report-card {
+            background: var(--bg-card); border-radius: var(--radius); padding: 20px;
+            border: 1px solid var(--border); display: flex; align-items: center; gap: 16px;
+            transition: var(--transition); cursor: pointer; margin-bottom: 12px;
+        }
+        .report-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .report-icon {
+            width: 48px; height: 48px; border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+        }
+        .report-info .r-title { font-size: 14px; font-weight: 600; }
+        .report-info .r-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+        .report-info .r-meta { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 16px; }
+
+        .empty-state {
+            text-align: center; padding: 60px 20px; color: var(--text-muted);
+        }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; color: #CBD5E1; }
+        .empty-state p { font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+        <div>
+            <div class="logo-text">FinVista</div>
+            <div class="logo-sub">Data Analytics</div>
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">概览</div>
+        <div class="nav-item active" onclick="switchPage('dashboard')">
+            <i class="fas fa-th-large"></i> 数据仪表盘
+        </div>
+        <div class="nav-item" onclick="switchPage('market')">
+            <i class="fas fa-chart-area"></i> 市场行情
+            <span class="nav-badge">Live</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('portfolio')">
+            <i class="fas fa-wallet"></i> 投资组合
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">分析</div>
+        <div class="nav-item" onclick="switchPage('analysis')">
+            <i class="fas fa-brain"></i> 智能分析
+        </div>
+        <div class="nav-item" onclick="switchPage('risk')">
+            <i class="fas fa-shield-alt"></i> 风险评估
+        </div>
+        <div class="nav-item" onclick="switchPage('report')">
+            <i class="fas fa-file-alt"></i> 数据报告
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">管理</div>
+        <div class="nav-item" onclick="openModal()">
+            <i class="fas fa-plus-circle"></i> 添加指标
+        </div>
+        <div class="nav-item" onclick="switchPage('alerts')">
+            <i class="fas fa-bell"></i> 预警中心
+            <span class="nav-badge">3</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('settings')">
+            <i class="fas fa-cog"></i> 系统设置
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <p>数据更新时间</p>
+        <span><span class="live-dot"></span> &nbsp;实时 · <span id="currentTime"></span></span>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1 id="pageTitle">数据仪表盘</h1>
+            <p id="pageDesc">实时监控金融关键指标与市场动态</p>
+        </div>
+        <div class="topbar-right">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索指标、股票、报告...">
+            </div>
+            <div class="topbar-btn">
+                <i class="fas fa-expand"></i>
+            </div>
+            <div class="topbar-btn">
+                <i class="fas fa-bell"></i>
+                <span class="dot"></span>
+            </div>
+            <div class="topbar-btn" style="background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: white; width: 38px; height: 38px; border-radius: 10px; font-size: 13px; font-weight: 700;">
+                U
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- ========== PAGE: DASHBOARD ========== -->
+        <div class="page active" id="page-dashboard">
+
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+            <div class="kpi-card animate-in" style="opacity:0">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <span class="kpi-change up"><i class="fas fa-arrow-up"></i> 2.35%</span>
+                </div>
+                <div class="kpi-value" id="kpi1">¥1,284,562</div>
+                <div class="kpi-label">总资产净值</div>
+                <div class="mini-bars" style="margin-top:14px;">
+                    <div class="mini-bar" style="height:40%;background:#C7D2FE;"></div>
+                    <div class="mini-bar" style="height:55%;background:#A5B4FC;"></div>
+                    <div class="mini-bar" style="height:45%;background:#818CF8;"></div>
+                    <div class="mini-bar" style="height:70%;background:#818CF8;"></div>
+                    <div class="mini-bar" style="height:60%;background:#6366F1;"></div>
+                    <div class="mini-bar" style="height:85%;background:#6366F1;"></div>
+                    <div class="mini-bar" style="height:75%;background:#4F46E5;"></div>
+                    <div class="mini-bar" style="height:90%;background:#4F46E5;"></div>
+                </div>
+            </div>
+            <div class="kpi-card animate-in" style="opacity:0">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fas fa-chart-pie"></i></div>
+                    <span class="kpi-change up"><i class="fas fa-arrow-up"></i> 5.12%</span>
+                </div>
+                <div class="kpi-value">+¥62,380</div>
+                <div class="kpi-label">本月收益</div>
+                <div class="mini-bars" style="margin-top:14px;">
+                    <div class="mini-bar" style="height:30%;background:#E9D5FF;"></div>
+                    <div class="mini-bar" style="height:50%;background:#D8B4FE;"></div>
+                    <div class="mini-bar" style="height:40%;background:#C084FC;"></div>
+                    <div class="mini-bar" style="height:65%;background:#C084FC;"></div>
+                    <div class="mini-bar" style="height:55%;background:#A855F7;"></div>
+                    <div class="mini-bar" style="height:80%;background:#A855F7;"></div>
+                    <div class="mini-bar" style="height:70%;background:#9333EA;"></div>
+                    <div class="mini-bar" style="height:95%;background:#9333EA;"></div>
+                </div>
+            </div>
+            <div class="kpi-card animate-in" style="opacity:0">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fas fa-percentage"></i></div>
+                    <span class="kpi-change down"><i class="fas fa-arrow-down"></i> 0.8%</span>
+                </div>
+                <div class="kpi-value">12.86%</div>
+                <div class="kpi-label">年化收益率</div>
+                <div class="mini-bars" style="margin-top:14px;">
+                    <div class="mini-bar" style="height:60%;background:#A7F3D0;"></div>
+                    <div class="mini-bar" style="height:45%;background:#6EE7B7;"></div>
+                    <div class="mini-bar" style="height:70%;background:#34D399;"></div>
+                    <div class="mini-bar" style="height:55%;background:#34D399;"></div>
+                    <div class="mini-bar" style="height:80%;background:#10B981;"></div>
+                    <div class="mini-bar" style="height:65%;background:#10B981;"></div>
+                    <div class="mini-bar" style="height:90%;background:#059669;"></div>
+                    <div class="mini-bar" style="height:85%;background:#059669;"></div>
+                </div>
+            </div>
+            <div class="kpi-card animate-in" style="opacity:0">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fas fa-exchange-alt"></i></div>
+                    <span class="kpi-change up"><i class="fas fa-arrow-up"></i> 156</span>
+                </div>
+                <div class="kpi-value">2,847</div>
+                <div class="kpi-label">今日交易量</div>
+                <div class="mini-bars" style="margin-top:14px;">
+                    <div class="mini-bar" style="height:50%;background:#FDE68A;"></div>
+                    <div class="mini-bar" style="height:70%;background:#FCD34D;"></div>
+                    <div class="mini-bar" style="height:60%;background:#FBBF24;"></div>
+                    <div class="mini-bar" style="height:85%;background:#F59E0B;"></div>
+                    <div class="mini-bar" style="height:75%;background:#F59E0B;"></div>
+                    <div class="mini-bar" style="height:95%;background:#D97706;"></div>
+                    <div class="mini-bar" style="height:80%;background:#D97706;"></div>
+                    <div class="mini-bar" style="height:100%;background:#B45309;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CHART + PIE -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">资产走势</div>
+                        <div class="chart-subtitle">近12个月净值变化趋势</div>
+                    </div>
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" onclick="updateMainChart('1M', this)">1月</button>
+                        <button class="chart-tab" onclick="updateMainChart('3M', this)">3月</button>
+                        <button class="chart-tab" onclick="updateMainChart('6M', this)">6月</button>
+                        <button class="chart-tab" onclick="updateMainChart('1Y', this)">1年</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">资产配置</div>
+                        <div class="chart-subtitle">当前投资组合分布</div>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 260px;">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#4F46E5;display:inline-block;"></span> 股票 42%</div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#A855F7;display:inline-block;"></span> 基金 28%</div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#10B981;display:inline-block;"></span> 债券 18%</div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#F59E0B;display:inline-block;"></span> 现金 12%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- METRICS ROW -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title"><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:6px;"></i> 上证指数</div>
+                    <span class="kpi-change up"><i class="fas fa-arrow-up"></i> 1.24%</span>
+                </div>
+                <div class="metric-chart-wrap">
+                    <canvas id="metricChart1"></canvas>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-current" style="color:var(--danger);">3,286.54</div>
+                    <div class="metric-sub">SH000001</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title"><i class="fas fa-chart-line" style="color:var(--accent);margin-right:6px;"></i> 深证成指</div>
+                    <span class="kpi-change down"><i class="fas fa-arrow-down"></i> 0.53%</span>
+                </div>
+                <div class="metric-chart-wrap">
+                    <canvas id="metricChart2"></canvas>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-current" style="color:var(--success);">10,452.18</div>
+                    <div class="metric-sub">SZ399001</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title"><i class="fas fa-coins" style="color:var(--warning);margin-right:6px;"></i> 创业板指</div>
+                    <span class="kpi-change up"><i class="fas fa-arrow-up"></i> 2.87%</span>
+                </div>
+                <div class="metric-chart-wrap">
+                    <canvas id="metricChart3"></canvas>
+                </div>
+                <div class="metric-footer">
+                    <div class="metric-current" style="color:var(--danger);">2,178.32</div>
+                    <div class="metric-sub">SZ399006</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM: TABLE + ALERTS -->
+        <div class="bottom-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">自选股行情</div>
+                        <div class="chart-subtitle">实时股价变动跟踪</div>
+                    </div>
+                    <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;" onclick="openModal()">
+                        <i class="fas fa-plus" style="margin-right:4px;"></i> 添加
+                    </button>
+                </div>
+                <table class="market-table">
+                    <thead>
+                        <tr>
+                            <th>股票</th>
+                            <th>最新价</th>
+                            <th>涨跌幅</th>
+                            <th>成交量</th>
+                            <th>趋势</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">预警通知</div>
+                        <div class="chart-subtitle">重要指标变动提醒</div>
+                    </div>
+                    <span style="font-size:12px;color:var(--text-muted);cursor:pointer;">查看全部 <i class="fas fa-chevron-right" style="font-size:10px;"></i></span>
+                </div>
+                <div id="alertList">
+                </div>
+            </div>
+        </div>
+
+        <!-- BAR CHART SECTION -->
+        <div class="chart-card" style="margin-bottom:28px;">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">月度收益对比</div>
+                    <div class="chart-subtitle">各板块月度收益表现</div>
+                </div>
+                <div class="chart-tabs">
+                    <button class="chart-tab active">收益</button>
+                    <button class="chart-tab">风险</button>
+                </div>
+            </div>
+            <div class="chart-container" style="height:280px;">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        </div>
+        <!-- END PAGE: DASHBOARD -->
+
+        <!-- ========== PAGE: MARKET ========== -->
+        <div class="page" id="page-market">
+            <div class="kpi-grid" style="margin-bottom:24px;">
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-globe"></i></div><span class="kpi-change up"><i class="fas fa-arrow-up"></i> 1.24%</span></div>
+                    <div class="kpi-value">3,286.54</div>
+                    <div class="kpi-label">上证指数 SH000001</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-building"></i></div><span class="kpi-change down"><i class="fas fa-arrow-down"></i> 0.53%</span></div>
+                    <div class="kpi-value">10,452.18</div>
+                    <div class="kpi-label">深证成指 SZ399001</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-rocket"></i></div><span class="kpi-change up"><i class="fas fa-arrow-up"></i> 2.87%</span></div>
+                    <div class="kpi-value">2,178.32</div>
+                    <div class="kpi-label">创业板指 SZ399006</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div><span class="kpi-change up"><i class="fas fa-arrow-up"></i> 0.32%</span></div>
+                    <div class="kpi-value">7.1245</div>
+                    <div class="kpi-label">USD/CNY 汇率</div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">大盘走势对比</div><div class="chart-subtitle">上证 vs 深证 vs 创业板</div></div></div>
+                    <div class="chart-container"><canvas id="marketLineChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">板块涨跌热力图</div><div class="chart-subtitle">今日各行业板块表现</div></div></div>
+                    <div class="heat-grid" id="heatGrid" style="margin-top:8px;"></div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header"><div><div class="chart-title">全市场涨跌分布</div><div class="chart-subtitle">今日A股市场个股涨跌统计</div></div></div>
+                <div class="chart-container" style="height:260px;"><canvas id="marketBarChart"></canvas></div>
+            </div>
+        </div>
+        <!-- END PAGE: MARKET -->
+
+        <!-- ========== PAGE: PORTFOLIO ========== -->
+        <div class="page" id="page-portfolio">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-wallet"></i></div><span class="kpi-change up"><i class="fas fa-arrow-up"></i> 2.35%</span></div>
+                    <div class="kpi-value">¥1,284,562</div>
+                    <div class="kpi-label">总资产</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-chart-line"></i></div></div>
+                    <div class="kpi-value">+¥62,380</div>
+                    <div class="kpi-label">累计收益</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-hand-holding-usd"></i></div><span class="kpi-change down"><i class="fas fa-arrow-down"></i></span></div>
+                    <div class="kpi-value" style="color:var(--success);">-¥8,420</div>
+                    <div class="kpi-label">今日盈亏</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-icon"><i class="fas fa-layer-group"></i></div></div>
+                    <div class="kpi-value">12</div>
+                    <div class="kpi-label">持仓数量</div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">组合净值曲线</div><div class="chart-subtitle">与沪深300基准对比</div></div></div>
+                    <div class="chart-container"><canvas id="portfolioLineChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">持仓分布</div><div class="chart-subtitle">按行业配置占比</div></div></div>
+                    <div class="chart-container" style="height:260px;"><canvas id="portfolioPieChart"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header"><div><div class="chart-title">持仓明细</div><div class="chart-subtitle">当前持有资产详情</div></div>
+                    <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;"><i class="fas fa-plus" style="margin-right:4px;"></i> 新建持仓</button>
+                </div>
+                <table class="market-table">
+                    <thead><tr><th>名称</th><th>持仓市值</th><th>盈亏</th><th>收益率</th><th>占比</th></tr></thead>
+                    <tbody id="portfolioTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END PAGE: PORTFOLIO -->
+
+        <!-- ========== PAGE: ANALYSIS ========== -->
+        <div class="page" id="page-analysis">
+            <div class="chart-card" style="margin-bottom:20px;">
+                <div class="chart-header"><div><div class="chart-title">AI 智能分析</div><div class="chart-subtitle">基于多维数据的综合投资洞察</div></div>
+                    <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;"><i class="fas fa-sync-alt" style="margin-right:4px;"></i> 刷新分析</button>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-box"><div class="label">综合评分</div><div class="value" style="color:var(--primary);">82 <span style="font-size:14px;color:var(--text-muted);">/ 100</span></div></div>
+                    <div class="stat-box"><div class="label">市场情绪</div><div class="value" style="color:var(--success);">偏多</div></div>
+                    <div class="stat-box"><div class="label">建议仓位</div><div class="value" style="color:var(--accent);">75%</div></div>
+                    <div class="stat-box"><div class="label">风险等级</div><div class="value" style="color:var(--warning);">中等</div></div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">技术指标分析</div><div class="chart-subtitle">MACD / RSI / 布林带综合研判</div></div></div>
+                    <div class="chart-container"><canvas id="analysisChart1"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">资金流向</div><div class="chart-subtitle">主力/散户资金净流入</div></div></div>
+                    <div class="chart-container"><canvas id="analysisChart2"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header"><div><div class="chart-title">AI 操作建议</div><div class="chart-subtitle">基于当前市场数据的策略推荐</div></div></div>
+                <div id="aiSuggestions" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+            </div>
+        </div>
+        <!-- END PAGE: ANALYSIS -->
+
+        <!-- ========== PAGE: RISK ========== -->
+        <div class="page" id="page-risk">
+            <div class="charts-grid" style="margin-bottom:20px;">
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">综合风险评估</div><div class="chart-subtitle">多维度风险指标监控</div></div></div>
+                    <div class="risk-meter">
+                        <div class="risk-meter-inner">
+                            <div class="score" style="color:var(--success);">72</div>
+                            <div class="txt">风险评分</div>
+                        </div>
+                    </div>
+                    <div class="stat-row" style="margin-top:20px;">
+                        <div class="stat-box"><div class="label">最大回撤</div><div class="value" style="color:var(--danger);">-12.4%</div></div>
+                        <div class="stat-box"><div class="label">夏普比率</div><div class="value" style="color:var(--primary);">1.86</div></div>
+                        <div class="stat-box"><div class="label">波动率</div><div class="value">18.3%</div></div>
+                        <div class="stat-box"><div class="label">Beta系数</div><div class="value">0.92</div></div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">回撤走势</div><div class="chart-subtitle">组合历史最大回撤记录</div></div></div>
+                    <div class="chart-container"><canvas id="riskDrawdownChart"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header"><div><div class="chart-title">风险因子雷达图</div><div class="chart-subtitle">各风险维度评估</div></div></div>
+                <div class="chart-container" style="height:320px;"><canvas id="riskRadarChart"></canvas></div>
+            </div>
+        </div>
+        <!-- END PAGE: RISK -->
+
+        <!-- ========== PAGE: REPORT ========== -->
+        <div class="page" id="page-report">
+            <div class="chart-card" style="margin-bottom:20px;">
+                <div class="chart-header"><div><div class="chart-title">数据报告中心</div><div class="chart-subtitle">生成与管理各类金融分析报告</div></div>
+                    <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;"><i class="fas fa-file-export" style="margin-right:4px;"></i> 生成报告</button>
+                </div>
+                <div id="reportList"></div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">收益归因分析</div><div class="chart-subtitle">超额收益来源分解</div></div></div>
+                    <div class="chart-container"><canvas id="reportAttribChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><div><div class="chart-title">风格暴露</div><div class="chart-subtitle">投资组合风格因子暴露</div></div></div>
+                    <div class="chart-container"><canvas id="reportStyleChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <!-- END PAGE: REPORT -->
+
+        <!-- ========== PAGE: ALERTS ========== -->
+        <div class="page" id="page-alerts">
+            <div class="kpi-grid">
+                <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div></div><div class="kpi-value" style="color:var(--danger);">3</div><div class="kpi-label">紧急预警</div></div>
+                <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon"><i class="fas fa-exclamation-circle"></i></div></div><div class="kpi-value" style="color:var(--warning);">7</div><div class="kpi-label">一般预警</div></div>
+                <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon"><i class="fas fa-info-circle"></i></div></div><div class="kpi-value" style="color:var(--primary);">15</div><div class="kpi-label">信息通知</div></div>
+                <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon"><i class="fas fa-check-circle"></i></div></div><div class="kpi-value" style="color:var(--success);">42</div><div class="kpi-label">已处理</div></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header"><div><div class="chart-title">全部预警记录</div><div class="chart-subtitle">按时间倒序排列</div></div>
+                    <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;" onclick="openModal()"><i class="fas fa-plus" style="margin-right:4px;"></i> 新建规则</button>
+                </div>
+                <div id="fullAlertList"></div>
+            </div>
+        </div>
+        <!-- END PAGE: ALERTS -->
+
+        <!-- ========== PAGE: SETTINGS ========== -->
+        <div class="page" id="page-settings">
+            <div class="chart-card">
+                <div class="settings-section">
+                    <h3><i class="fas fa-bell" style="color:var(--primary);margin-right:8px;"></i>通知设置</h3>
+                    <div class="setting-row"><div class="info"><div class="s-title">价格预警推送</div><div class="s-desc">当自选股触及预警价格时通知</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+                    <div class="setting-row"><div class="info"><div class="s-title">大盘异动提醒</div><div class="s-desc">指数波动超过2%时发送提醒</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+                    <div class="setting-row"><div class="info"><div class="s-title">每日收盘总结</div><div class="s-desc">每个交易日收盘后推送持仓总结</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+                    <div class="setting-row"><div class="info"><div class="s-title">新闻快讯推送</div><div class="s-desc">推送与自选股相关的重大新闻</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+                </div>
+                <div class="settings-section">
+                    <h3><i class="fas fa-palette" style="color:var(--accent);margin-right:8px;"></i>显示设置</h3>
+                    <div class="setting-row"><div class="info"><div class="s-title">涨跌颜色</div><div class="s-desc">中国A股风格（红涨绿跌）</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+                    <div class="setting-row"><div class="info"><div class="s-title">数据自动刷新</div><div class="s-desc">每3秒自动更新行情数据</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+                    <div class="setting-row"><div class="info"><div class="s-title">图表动画</div><div class="s-desc">开启图表切换动画效果</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+                </div>
+                <div class="settings-section">
+                    <h3><i class="fas fa-database" style="color:var(--success);margin-right:8px;"></i>数据管理</h3>
+                    <div class="setting-row"><div class="info"><div class="s-title">本地数据存储</div><div class="s-desc">所有数据保存在浏览器本地，不上传服务器</div></div><span style="font-size:12px;color:var(--text-muted);">已使用 2.4 MB</span></div>
+                    <div class="setting-row"><div class="info"><div class="s-title">清除缓存数据</div><div class="s-desc">清除所有本地缓存的行情和历史数据</div></div><button class="btn btn-secondary" style="font-size:12px;padding:6px 14px;">清除</button></div>
+                    <div class="setting-row"><div class="info"><div class="s-title">导出配置</div><div class="s-desc">将当前设置导出为配置文件</div></div><button class="btn btn-secondary" style="font-size:12px;padding:6px 14px;">导出</button></div>
+                </div>
+            </div>
+        </div>
+        <!-- END PAGE: SETTINGS -->
+
+    </div>
+</div>
+
+<!-- ADD INDICATOR MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <h2>添加监控指标</h2>
+        <div class="form-group">
+            <label>指标名称</label>
+            <input type="text" id="indicatorName" placeholder="例如：沪深300指数">
+        </div>
+        <div class="form-group">
+            <label>指标代码</label>
+            <input type="text" id="indicatorCode" placeholder="例如：SH000300">
+        </div>
+        <div class="form-group">
+            <label>分类</label>
+            <select id="indicatorType">
+                <option value="stock">股票指数</option>
+                <option value="fund">基金净值</option>
+                <option value="bond">债券收益</option>
+                <option value="commodity">大宗商品</option>
+                <option value="forex">汇率</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>预警阈值</label>
+            <input type="number" id="indicatorThreshold" placeholder="触发预警的价格阈值">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="addIndicator()">添加指标</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// === DATA ===
+const stockData = [
+    { name: '贵州茅台', code: 'SH600519', price: 1685.30, change: 2.45, volume: '1.2万', color: '#4F46E5', trend: [30,45,35,60,50,70,65,85] },
+    { name: '宁德时代', code: 'SZ300750', price: 198.56, change: -1.32, volume: '3.8万', color: '#A855F7', trend: [70,65,80,60,55,50,45,40] },
+    { name: '比亚迪', code: 'SZ002594', price: 265.80, change: 3.18, volume: '2.1万', color: '#10B981', trend: [40,50,55,65,60,75,80,90] },
+    { name: '招商银行', code: 'SH600036', price: 35.42, change: -0.56, volume: '5.6万', color: '#F59E0B', trend: [60,55,50,55,45,40,35,30] },
+    { name: '中国平安', code: 'SH601318', price: 48.75, change: 1.05, volume: '4.2万', color: '#EF4444', trend: [35,40,45,50,55,60,65,70] },
+    { name: '隆基绿能', code: 'SH601012', price: 26.88, change: -2.14, volume: '6.3万', color: '#8B5CF6', trend: [80,75,70,65,60,50,45,35] },
+];
+
+const alertData = [
+    { type: 'critical', title: '止损预警触发', desc: '隆基绿能 (SH601012) 跌破26.00止损线，当前价26.88，建议关注。', time: '2分钟前' },
+    { type: 'warning', title: '波动率异常', desc: '创业板指近5日波动率达到8.7%，超出历史均值2个标准差。', time: '15分钟前' },
+    { type: 'info', title: '持仓再平衡提醒', desc: '股票仓位占比达44%，超出目标42%，建议适当调仓至债券。', time: '1小时前' },
+    { type: 'warning', title: '利率变动提示', desc: '央行LPR利率下调5bp，债券类资产预期收益可能受到影响。', time: '3小时前' },
+];
+
+// === INIT ===
+document.addEventListener('DOMContentLoaded', () => {
+    updateTime();
+    setInterval(updateTime, 1000);
+    renderStockTable();
+    renderAlerts();
+    initMainChart();
+    initPieChart();
+    initBarChart();
+    initMetricCharts();
+});
+
+function updateTime() {
+    const now = new Date();
+    document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
+}
+
+// === RENDER TABLE ===
+function renderStockTable() {
+    const tbody = document.getElementById('stockTableBody');
+    tbody.innerHTML = stockData.map(s => {
+        const isUp = s.change >= 0;
+        return `
+        <tr>
+            <td>
+                <div class="stock-name">
+                    <div class="stock-avatar" style="background:${s.color}">${s.name.substring(0,1)}</div>
+                    <div class="stock-info">
+                        <div class="name">${s.name}</div>
+                        <div class="code">${s.code}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="price ${isUp ? 'up' : 'down'}">¥${s.price.toFixed(2)}</td>
+            <td><span class="change-badge ${isUp ? 'up' : 'down'}"><i class="fas fa-arrow-${isUp ? 'up' : 'down'}" style="font-size:10px;"></i> ${Math.abs(s.change).toFixed(2)}%</span></td>
+            <td style="color:var(--text-muted);">${s.volume}手</td>
+            <td>
+                <div class="mini-bars">
+                    ${s.trend.map((v, i) => `<div class="mini-bar" style="height:${v}%;background:${isUp ? (i > 5 ? '#EF4444' : '#FECACA') : (i > 5 ? '#10B981' : '#A7F3D0')};"></div>`).join('')}
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+// === RENDER ALERTS ===
+function renderAlerts() {
+    const list = document.getElementById('alertList');
+    list.innerHTML = alertData.map(a => `
+        <div class="alert-item">
+            <div class="alert-dot ${a.type}"></div>
+            <div class="alert-content">
+                <div class="alert-title">${a.title}</div>
+                <div class="alert-desc">${a.desc}</div>
+                <div class="alert-time"><i class="far fa-clock" style="margin-right:4px;"></i>${a.time}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// === CHARTS ===
+const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+};
+
+let mainChart;
+
+function generateMainData(points) {
+    const labels = [];
+    const data = [];
+    const base = 1100000;
+    for (let i = points; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        labels.push(`${d.getMonth()+1}/${d.getDate()}`);
+        data.push(base + Math.random() * 200000 * (1 + (points - i) / points) - 50000 + Math.sin(i/3)*30000);
+    }
+    return { labels, data };
+}
+
+function initMainChart() {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.15)');
+    gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
+
+    const { labels, data } = generateMainData(30);
+
+    mainChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                data,
+                borderColor: '#4F46E5',
+                borderWidth: 2.5,
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: '#4F46E5',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 3,
+            }]
+        },
+        options: {
+            ...chartDefaults,
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' } },
+                y: {
+                    grid: { color: 'rgba(226,232,240,0.5)', drawBorder: false },
+                    ticks: { font: { size: 11 }, color: '#94A3B8', callback: v => '¥' + (v/10000).toFixed(0) + '万' }
+                }
+            },
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1E1B4B',
+                    titleFont: { size: 12 },
+                    bodyFont: { size: 13 },
+                    padding: 12,
+                    cornerRadius: 10,
+                    callbacks: { label: ctx => '¥' + ctx.parsed.y.toLocaleString() }
+                }
+            }
+        }
+    });
+}
+
+function updateMainChart(range, btn) {
+    document.querySelectorAll('.chart-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    const points = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365 }[range] || 30;
+    const { labels, data } = generateMainData(points);
+    mainChart.data.labels = labels;
+    mainChart.data.datasets[0].data = data;
+    mainChart.update('active');
+}
+
+function initPieChart() {
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['股票', '基金', '债券', '现金'],
+            datasets: [{
+                data: [42, 28, 18, 12],
+                backgroundColor: ['#4F46E5', '#A855F7', '#10B981', '#F59E0B'],
+                borderWidth: 0,
+                hoverOffset: 8,
+            }]
+        },
+        options: {
+            ...chartDefaults,
+            cutout: '68%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1E1B4B',
+                    padding: 10,
+                    cornerRadius: 10,
+                    callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '%' }
+                }
+            }
+        }
+    });
+}
+
+function initBarChart() {
+    const ctx = document.getElementById('barChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+            datasets: [
+                {
+                    label: '股票',
+                    data: [3.2, -1.5, 4.1, 2.8, -0.6, 5.3, 3.7, -2.1, 4.8, 2.2, 6.1, 3.5],
+                    backgroundColor: '#4F46E5',
+                    borderRadius: 6,
+                    barPercentage: 0.6,
+                },
+                {
+                    label: '基金',
+                    data: [2.1, 0.8, 1.5, -0.5, 1.2, 2.8, 1.9, -0.3, 2.5, 1.8, 3.2, 1.6],
+                    backgroundColor: '#A855F7',
+                    borderRadius: 6,
+                    barPercentage: 0.6,
+                },
+                {
+                    label: '债券',
+                    data: [0.5, 0.4, 0.6, 0.3, 0.5, 0.4, 0.7, 0.5, 0.6, 0.4, 0.8, 0.5],
+                    backgroundColor: '#10B981',
+                    borderRadius: 6,
+                    barPercentage: 0.6,
+                }
+            ]
+        },
+        options: {
+            ...chartDefaults,
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' } },
+                y: {
+                    grid: { color: 'rgba(226,232,240,0.5)', drawBorder: false },
+                    ticks: { font: { size: 11 }, color: '#94A3B8', callback: v => v + '%' }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                    labels: { boxWidth: 10, boxHeight: 10, borderRadius: 5, useBorderRadius: true, padding: 16, font: { size: 12 } }
+                },
+                tooltip: {
+                    backgroundColor: '#1E1B4B',
+                    padding: 10,
+                    cornerRadius: 10,
+                    callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' }
+                }
+            }
+        }
+    });
+}
+
+function initMetricCharts() {
+    ['metricChart1','metricChart2','metricChart3'].forEach(id => {
+        const ctx = document.getElementById(id).getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 80);
+        const colors = {
+            metricChart1: { line: '#EF4444', bg1: 'rgba(239,68,68,0.15)', bg2: 'rgba(239,68,68,0)' },
+            metricChart2: { line: '#10B981', bg1: 'rgba(16,185,129,0.15)', bg2: 'rgba(16,185,129,0)' },
+            metricChart3: { line: '#F59E0B', bg1: 'rgba(245,158,11,0.15)', bg2: 'rgba(245,158,11,0)' },
+        }[id];
+        gradient.addColorStop(0, colors.bg1);
+        gradient.addColorStop(1, colors.bg2);
+
+        const data = Array.from({length: 20}, () => Math.random() * 100);
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map((_,i) => i),
+                datasets: [{
+                    data,
+                    borderColor: colors.line,
+                    borderWidth: 2,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                scales: { x: { display: false }, y: { display: false } },
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            }
+        });
+    });
+}
+
+// === NAVIGATION ===
+let currentPage = 'dashboard';
+const pageInitialized = {};
+
+function switchPage(page) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (event && event.currentTarget) event.currentTarget.classList.add('active');
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById('page-' + page);
+    if (el) el.classList.add('active');
+
+    currentPage = page;
+
+    const titles = {
+        dashboard: ['数据仪表盘', '实时监控金融关键指标与市场动态'],
+        market: ['市场行情', '全市场实时行情与深度数据'],
+        portfolio: ['投资组合', '管理您的资产配置与持仓'],
+        analysis: ['智能分析', 'AI驱动的投资洞察与建议'],
+        risk: ['风险评估', '多维度风险分析与压力测试'],
+        report: ['数据报告', '生成与导出各类金融分析报告'],
+        alerts: ['预警中心', '实时监控指标异常与风险预警'],
+        settings: ['系统设置', '个性化配置您的数据面板'],
+    };
+    document.getElementById('pageTitle').textContent = titles[page]?.[0] || '数据仪表盘';
+    document.getElementById('pageDesc').textContent = titles[page]?.[1] || '';
+
+    // Lazy init page content
+    if (!pageInitialized[page]) {
+        initPageContent(page);
+        pageInitialized[page] = true;
+    }
+}
+
+function initPageContent(page) {
+    switch(page) {
+        case 'market': initMarketPage(); break;
+        case 'portfolio': initPortfolioPage(); break;
+        case 'analysis': initAnalysisPage(); break;
+        case 'risk': initRiskPage(); break;
+        case 'report': initReportPage(); break;
+        case 'alerts': initAlertsPage(); break;
+    }
+}
+
+// Helper: create a simple sparkline chart
+function makeSparkline(canvasId, color, dataPoints) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createLinearGradient(0,0,0,canvas.parentElement.clientHeight || 300);
+    grad.addColorStop(0, color.replace(')', ',0.15)').replace('rgb', 'rgba'));
+    grad.addColorStop(1, color.replace(')', ',0)').replace('rgb', 'rgba'));
+    const data = dataPoints || Array.from({length: 30}, () => Math.random() * 100);
+    new Chart(ctx, {
+        type: 'line', data: { labels: data.map((_,i)=>i), datasets: [{ data, borderColor: color, borderWidth: 2, backgroundColor: grad, fill: true, tension: 0.4, pointRadius: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: false } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+    });
+}
+
+function makeChart(canvasId, type, labels, datasets, extraOpts) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const opts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1E1B4B', padding: 10, cornerRadius: 10 } }, ...extraOpts };
+    if (!extraOpts?.scales) {
+        opts.scales = {
+            x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' } },
+            y: { grid: { color: 'rgba(226,232,240,0.5)' }, ticks: { font: { size: 11 }, color: '#94A3B8' } }
+        };
+    }
+    new Chart(canvas.getContext('2d'), { type, data: { labels, datasets }, options: opts });
+}
+
+// === MARKET PAGE ===
+function initMarketPage() {
+    // Line chart: 3 indexes
+    const labels = Array.from({length: 60}, (_, i) => { const d = new Date(); d.setDate(d.getDate()-60+i); return `${d.getMonth()+1}/${d.getDate()}`; });
+    makeChart('marketLineChart', 'line', labels, [
+        { label: '上证', data: labels.map((_,i)=>3100+Math.random()*200+Math.sin(i/5)*80), borderColor: '#4F46E5', borderWidth: 2, tension: 0.4, pointRadius: 0, fill: false },
+        { label: '深证', data: labels.map((_,i)=>9800+Math.random()*600+Math.sin(i/4)*200), borderColor: '#A855F7', borderWidth: 2, tension: 0.4, pointRadius: 0, fill: false },
+        { label: '创业板', data: labels.map((_,i)=>2000+Math.random()*300+Math.sin(i/3)*100), borderColor: '#F59E0B', borderWidth: 2, tension: 0.4, pointRadius: 0, fill: false },
+    ], { plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, borderRadius: 5, useBorderRadius: true, padding: 16, font: { size: 12 } } }, tooltip: { backgroundColor: '#1E1B4B', padding: 10, cornerRadius: 10 } } });
+
+    // Heat map
+    const sectors = ['银行','证券','保险','地产','医药','消费','科技','新能源','半导体','军工','钢铁','煤炭','有色','化工','白酒','农业'];
+    const grid = document.getElementById('heatGrid');
+    if (grid) {
+        grid.innerHTML = sectors.map(s => {
+            const v = (Math.random()-0.4)*8;
+            const bg = v >= 0 ? `rgba(239,68,68,${0.3+v/10})` : `rgba(16,185,129,${0.3+Math.abs(v)/10})`;
+            return `<div class="heat-cell" style="background:${bg}" title="${s}: ${v>=0?'+':''}${v.toFixed(2)}%">${s}<br><span style="font-size:10px;">${v>=0?'+':''}${v.toFixed(1)}%</span></div>`;
+        }).join('');
+    }
+
+    // Bar chart
+    makeChart('marketBarChart', 'bar',
+        ['涨停','>7%','3-7%','1-3%','0-1%','-1-0%','-3--1%','-7--3%','<-7%','跌停'],
+        [{ data: [45,82,356,820,1200,980,620,180,55,12], backgroundColor: ['#EF4444','#EF4444','#F87171','#FCA5A5','#FEE2E2','#D1FAE5','#6EE7B7','#34D399','#10B981','#059669'], borderRadius: 6, barPercentage: 0.7 }]
+    );
+}
+
+// === PORTFOLIO PAGE ===
+function initPortfolioPage() {
+    const labels = Array.from({length: 60}, (_,i) => { const d = new Date(); d.setDate(d.getDate()-60+i); return `${d.getMonth()+1}/${d.getDate()}`; });
+    makeChart('portfolioLineChart', 'line', labels, [
+        { label: '我的组合', data: labels.map((_,i)=>1+Math.random()*0.3*(i/60)), borderColor: '#4F46E5', borderWidth: 2.5, tension: 0.4, pointRadius: 0, fill: false },
+        { label: '沪深300', data: labels.map((_,i)=>1+Math.random()*0.2*(i/60)), borderColor: '#94A3B8', borderWidth: 1.5, borderDash: [5,5], tension: 0.4, pointRadius: 0, fill: false },
+    ], { plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, borderRadius: 5, useBorderRadius: true, padding: 16, font: { size: 12 } } }, tooltip: { backgroundColor: '#1E1B4B', padding: 10, cornerRadius: 10 } } });
+
+    makeChart('portfolioPieChart', 'doughnut', ['消费','科技','金融','医药','新能源','其他'], [{
+        data: [25,22,18,15,12,8], backgroundColor: ['#4F46E5','#A855F7','#10B981','#F59E0B','#EF4444','#94A3B8'], borderWidth: 0, hoverOffset: 8
+    }], { cutout: '65%', plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, padding: 12, font: { size: 12 } } }, tooltip: { backgroundColor: '#1E1B4B', padding: 10, cornerRadius: 10, callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '%' } } } });
+
+    const tbody = document.getElementById('portfolioTableBody');
+    if (tbody) {
+        const holdings = [
+            { name:'贵州茅台', code:'SH600519', value:'¥186,200', pnl:'+¥22,350', ret:'+13.6%', pct:'14.5%', up:true },
+            { name:'宁德时代', code:'SZ300750', value:'¥152,800', pnl:'-¥8,420', ret:'-5.2%', pct:'11.9%', up:false },
+            { name:'比亚迪', code:'SZ002594', value:'¥128,500', pnl:'+¥38,600', ret:'+42.9%', pct:'10.0%', up:true },
+            { name:'招商银行', code:'SH600036', value:'¥98,400', pnl:'+¥5,200', ret:'+5.6%', pct:'7.7%', up:true },
+            { name:'中国平安', code:'SH601318', value:'¥86,200', pnl:'-¥12,800', ret:'-12.9%', pct:'6.7%', up:false },
+            { name:'隆基绿能', code:'SH601012', value:'¥72,600', pnl:'+¥8,900', ret:'+14.0%', pct:'5.7%', up:true },
+        ];
+        tbody.innerHTML = holdings.map(h => `
+            <tr>
+                <td><div class="stock-name"><div class="stock-avatar" style="background:${h.up?'#4F46E5':'#94A3B8'}">${h.name[0]}</div><div class="stock-info"><div class="name">${h.name}</div><div class="code">${h.code}</div></div></div></td>
+                <td style="font-weight:700;">${h.value}</td>
+                <td style="color:${h.up?'var(--danger)':'var(--success)'}; font-weight:600;">${h.pnl}</td>
+                <td><span class="change-badge ${h.up?'up':'down'}"><i class="fas fa-arrow-${h.up?'up':'down'}" style="font-size:10px;"></i> ${h.ret}</span></td>
+                <td style="color:var(--text-muted);">${h.pct}</td>
+            </tr>`).join('');
+    }
+}
+
+// === ANALYSIS PAGE ===
+function initAnalysisPage() {
+    makeSparkline('analysisChart1', 'rgb(79,70,229)', Array.from({length:40}, (_,i)=>50+Math.sin(i/3)*20+Math.random()*15));
+    makeSparkline('analysisChart2', 'rgb(168,85,247)', Array.from({length:40}, (_,i)=>50+Math.cos(i/4)*25+Math.random()*10));
+
+    const sugBox = document.getElementById('aiSuggestions');
+    if (sugBox) {
+        const suggestions = [
+            { icon:'fa-arrow-trend-up', color:'var(--success)', bg:'#ECFDF5', title:'加仓新能源板块', desc:'近期资金持续流入，技术面突破关键阻力位，建议适当增加仓位。', tag:'高置信度' },
+            { icon:'fa-arrow-trend-down', color:'var(--danger)', bg:'#FEF2F2', title:'减仓地产板块', desc:'政策面不明朗，资金大幅流出，短期建议降低地产相关持仓。', tag:'高置信度' },
+            { icon:'fa-shield-halved', color:'var(--warning)', bg:'#FFFBEB', title:'增加债券配置', desc:'市场波动率上升，建议将部分权益资产转移至债券类避险资产。', tag:'中置信度' },
+            { icon:'fa-coins', color:'var(--primary)', bg:'#EEF2FF', title:'关注分红策略', desc:'接近分红季，高股息率标的具备防御价值，可关注银行、煤炭板块。', tag:'中置信度' },
+        ];
+        sugBox.innerHTML = suggestions.map(s => `
+            <div style="background:${s.bg};border-radius:var(--radius-sm);padding:18px;display:flex;gap:14px;align-items:flex-start;">
+                <div style="width:40px;height:40px;border-radius:10px;background:${s.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas ${s.icon}" style="color:white;font-size:16px;"></i></div>
+                <div style="flex:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-weight:700;font-size:14px;">${s.title}</span><span style="font-size:10px;padding:2px 8px;border-radius:10px;background:${s.color}20;color:${s.color};font-weight:600;">${s.tag}</span></div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;">${s.desc}</div></div>
+            </div>`).join('');
+    }
+}
+
+// === RISK PAGE ===
+function initRiskPage() {
+    makeSparkline('riskDrawdownChart', 'rgb(239,68,68)', Array.from({length:60}, (_,i)=>{ const v = -Math.random()*15*Math.exp(-i/20); return v; }));
+
+    makeChart('riskRadarChart', 'radar',
+        ['市场风险','信用风险','流动性风险','集中度风险','汇率风险','波动率风险'],
+        [{ label:'当前', data:[72,85,68,55,45,62], borderColor:'#4F46E5', backgroundColor:'rgba(79,70,229,0.15)', borderWidth:2, pointBackgroundColor:'#4F46E5', pointRadius:4 },
+         { label:'目标', data:[60,70,60,50,40,50], borderColor:'#A855F7', backgroundColor:'rgba(168,85,247,0.08)', borderWidth:2, borderDash:[5,5], pointBackgroundColor:'#A855F7', pointRadius:3 }],
+        { scales: { r: { beginAtZero: true, max: 100, grid: { color: 'rgba(226,232,240,0.5)' }, angleLines: { color: 'rgba(226,232,240,0.5)' }, pointLabels: { font: { size: 12 }, color: '#64748B' }, ticks: { display: false } } }, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, padding: 16, font: { size: 12 } } }, tooltip: { backgroundColor: '#1E1B4B', padding: 10, cornerRadius: 10 } } }
+    );
+}
+
+// === REPORT PAGE ===
+function initReportPage() {
+    const reportList = document.getElementById('reportList');
+    if (reportList) {
+        const reports = [
+            { icon:'fa-chart-pie', color:'var(--primary)', bg:'#EEF2FF', title:'2026年Q1投资总结报告', desc:'第一季度投资业绩回顾与归因分析', date:'2026-04-01', pages:'28页' },
+            { icon:'fa-shield-alt', color:'var(--warning)', bg:'#FFFBEB', title:'三月风险评估报告', desc:'组合风险因子变化与压力测试结果', date:'2026-03-31', pages:'16页' },
+            { icon:'fa-coins', color:'var(--success)', bg:'#ECFDF5', title:'年度资产配置建议', desc:'基于宏观环境的2026年资产配置策略', date:'2026-03-15', pages:'35页' },
+            { icon:'fa-file-invoice', color:'var(--accent)', bg:'#F3E8FF', title:'税务优化分析报告', desc:'投资收益税务筹划与优化建议', date:'2026-03-01', pages:'12页' },
+        ];
+        reportList.innerHTML = reports.map(r => `
+            <div class="report-card">
+                <div class="report-icon" style="background:${r.bg};color:${r.color};"><i class="fas ${r.icon}"></i></div>
+                <div class="report-info" style="flex:1;">
+                    <div class="r-title">${r.title}</div>
+                    <div class="r-desc">${r.desc}</div>
+                    <div class="r-meta"><span><i class="far fa-calendar" style="margin-right:4px;"></i>${r.date}</span><span><i class="far fa-file" style="margin-right:4px;"></i>${r.pages}</span><span style="color:var(--primary);cursor:pointer;">查看详情 <i class="fas fa-chevron-right" style="font-size:10px;"></i></span></div>
+                </div>
+                <button class="btn btn-secondary" style="font-size:11px;padding:5px 12px;"><i class="fas fa-download" style="margin-right:4px;"></i>下载</button>
+            </div>`).join('');
+    }
+
+    makeChart('reportAttribChart', 'bar',
+        ['行业配置','选股效应','择时效应','交易成本','其他'],
+        [{ data: [3.2, 1.8, -0.5, -0.8, 0.3], backgroundColor: ctx => ctx.parsed.y >= 0 ? '#4F46E5' : '#EF4444', borderRadius: 6, barPercentage: 0.5 }],
+        { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1E1B4B', padding: 10, cornerRadius: 10, callbacks: { label: ctx => ctx.parsed.x + '%' } } }, scales: { x: { grid: { color: 'rgba(226,232,240,0.5)' }, ticks: { callback: v => v+'%' } }, y: { grid: { display: false } } } }
+    );
+
+    makeChart('reportStyleChart', 'radar',
+        ['价值','成长','大盘','小盘','动量','质量'],
+        [{ data: [65,80,70,45,55,72], borderColor: '#4F46E5', backgroundColor: 'rgba(79,70,229,0.15)', borderWidth: 2, pointBackgroundColor: '#4F46E5' }],
+        { scales: { r: { beginAtZero: true, max: 100, grid: { color: 'rgba(226,232,240,0.5)' }, angleLines: { color: 'rgba(226,232,240,0.5)' }, pointLabels: { font: { size: 12 }, color: '#64748B' }, ticks: { display: false } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1E1B4B', padding: 10, cornerRadius: 10 } } }
+    );
+}
+
+// === ALERTS PAGE ===
+function initAlertsPage() {
+    const fullList = document.getElementById('fullAlertList');
+    if (fullList) {
+        const allAlerts = [
+            { type:'critical', title:'止损预警触发', desc:'隆基绿能 (SH601012) 跌破26.00止损线，当前价26.88。', time:'2分钟前' },
+            { type:'critical', title:'融资融券预警', desc:'维持担保比例降至150%，请及时追加保证金。', time:'8分钟前' },
+            { type:'critical', title:'异常交易提醒', desc:'贵州茅台成交量突增300%，请确认是否为本人操作。', time:'25分钟前' },
+            { type:'warning', title:'波动率异常', desc:'创业板指近5日波动率达到8.7%，超出历史均值2个标准差。', time:'15分钟前' },
+            { type:'warning', title:'利率变动提示', desc:'央行LPR利率下调5bp，债券类资产预期收益可能受到影响。', time:'3小时前' },
+            { type:'warning', title:'持仓集中度', desc:'前三大重仓股占比合计达48%，建议适当分散化。', time:'5小时前' },
+            { type:'warning', title:'流动性预警', desc:'部分中小盘持仓近5日平均成交额下降40%。', time:'6小时前' },
+            { type:'info', title:'持仓再平衡提醒', desc:'股票仓位占比达44%，超出目标42%，建议适当调仓至债券。', time:'1小时前' },
+            { type:'info', title:'分红到账通知', desc:'招商银行每股分红¥1.20已到账，共计¥3,360。', time:'2小时前' },
+            { type:'info', title:'周报生成', desc:'本周投资周报已自动生成，点击查看详情。', time:'4小时前' },
+        ];
+        fullList.innerHTML = allAlerts.map(a => `
+            <div class="alert-item">
+                <div class="alert-dot ${a.type}"></div>
+                <div class="alert-content"><div class="alert-title">${a.title}</div><div class="alert-desc">${a.desc}</div><div class="alert-time"><i class="far fa-clock" style="margin-right:4px;"></i>${a.time}</div></div>
+            </div>`).join('');
+    }
+}
+
+// === MODAL ===
+function openModal() {
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal(e) {
+    if (!e || e.target === e.currentTarget) {
+        document.getElementById('modalOverlay').classList.remove('show');
+    }
+}
+
+function addIndicator() {
+    const name = document.getElementById('indicatorName').value;
+    const code = document.getElementById('indicatorCode').value;
+    if (name && code) {
+        // Simulate adding
+        closeModal();
+        document.getElementById('indicatorName').value = '';
+        document.getElementById('indicatorCode').value = '';
+        // Show feedback
+        showToast(`已添加指标: ${name} (${code})`);
+    }
+}
+
+// === TOAST ===
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.textContent = msg;
+    Object.assign(toast.style, {
+        position: 'fixed', bottom: '32px', right: '32px', background: 'linear-gradient(135deg, #4F46E5, #A855F7)',
+        color: 'white', padding: '14px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: '600',
+        boxShadow: '0 10px 25px rgba(79,70,229,0.3)', zIndex: 300, animation: 'fadeInUp 0.3s ease'
+    });
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2500);
+    setTimeout(() => toast.remove(), 2800);
+}
+
+// === SIMULATE LIVE DATA UPDATES ===
+setInterval(() => {
+    stockData.forEach(s => {
+        s.price += (Math.random() - 0.5) * s.price * 0.002;
+        s.change += (Math.random() - 0.5) * 0.1;
+    });
+    renderStockTable();
+}, 3000);
+</script>
+
+</body>
+</html>
